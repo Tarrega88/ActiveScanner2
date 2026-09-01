@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>ActiveScanner</AssemblyName>
+    <RootNamespace>ActiveScanner</RootNamespace>
+    <Version>1.1.1</Version>
+    <Authors>ActiveScanner Team</Authors>
+    <Description>Active Directory Scanner with Network Tools</Description>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- Publishing options -->
+  <PropertyGroup>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishDir>publish\$([System.DateTime]::Now.ToString('yyyy-MM-dd_HH-mm-ss'))\</PublishDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.21" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.0.0" />
+    <PackageReference Include="MaterialDesignColors" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\**\*" Exclude="Resources\default-groups.json" />
+    <EmbeddedResource Include="Resources\default-groups.json" />
+  </ItemGroup>
+
+  <!-- Remove WebView2 XML doc files from publish output -->
+  <Target Name="RemoveWebView2XmlDocs" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.xml' and $([System.String]::Copy('%(Filename)').StartsWith('Microsoft.Web.WebView2'))" />
+    </ItemGroup>
+  </Target>
+
+</Project>

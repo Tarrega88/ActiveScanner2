@@ -1,0 +1,214 @@
+<Window x:Class="ActiveScanner.Views.PushRunWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Push &amp; Run"
+        Height="880" Width="1020"
+        MinHeight="700" MinWidth="840"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        Style="{StaticResource MaterialDesignWindow}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <Window.Resources>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,10,8,3"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Opacity" Value="0.8"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+            <materialDesign:PackIcon Kind="RocketLaunch" Width="28" Height="28"
+                                     VerticalAlignment="Center" Margin="0,0,12,0"
+                                     Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+            <StackPanel>
+                <TextBlock Text="Push &amp; Run" Style="{StaticResource MaterialDesignHeadline6TextBlock}"/>
+                <TextBlock Text="Copy a payload to the selected machines and run it silently over WinRM."
+                           FontSize="11" Opacity="0.7"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Payload + options -->
+        <materialDesign:Card Grid.Row="1" Padding="12" Margin="0,0,0,12"
+                             UniformCornerRadius="6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Drop zone -->
+                <Border x:Name="DropZone" Grid.Column="0" Margin="0,0,12,0"
+                        AllowDrop="True" Drop="DropZone_Drop" DragOver="DropZone_DragOver"
+                        BorderBrush="{DynamicResource PrimaryHueMidBrush}" BorderThickness="1.5"
+                        CornerRadius="6" Background="{DynamicResource MaterialDesignChipBackground}">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12">
+                        <materialDesign:PackIcon Kind="CloudUpload" Width="40" Height="40"
+                                                 HorizontalAlignment="Center" Opacity="0.6"/>
+                        <TextBlock Text="Drop an .exe / .msi / .ps1 / .bat / .inf, or a folder"
+                                   TextWrapping="Wrap" TextAlignment="Center"
+                                   Margin="0,8,0,8" FontSize="11" Opacity="0.75"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Content="File…" Click="BrowseFile_Click"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Padding="10,2" Height="28" FontSize="11" Margin="0,0,6,0"/>
+                            <Button Content="Folder…" Click="BrowseFolder_Click"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Padding="10,2" Height="28" FontSize="11"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Fields -->
+                <StackPanel Grid.Column="1">
+                    <TextBlock x:Name="PayloadSummary" Text="No payload selected"
+                               FontWeight="SemiBold" FontSize="12" Margin="0,0,0,2"/>
+                    <TextBlock x:Name="PayloadHash" Text="" FontSize="10" Opacity="0.6"
+                               TextTrimming="CharacterEllipsis" Margin="0,0,0,4"/>
+
+                    <TextBlock Text="Run this file" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="EntryPointCombo" Margin="0,0,0,4"
+                              SelectionChanged="EntryPointCombo_SelectionChanged"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              FontSize="12" Padding="8,4"/>
+
+                    <TextBlock Text="Run as" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="RunAsCombo" Margin="0,0,0,4"
+                              SelectionChanged="RunAsCombo_SelectionChanged"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              FontSize="12" Padding="8,4">
+                        <ComboBoxItem Content="Auto (by file type)" Tag="Auto" IsSelected="True"/>
+                        <ComboBoxItem Content="Executable" Tag="Executable"/>
+                        <ComboBoxItem Content="MSI (msiexec)" Tag="Msi"/>
+                        <ComboBoxItem Content="PowerShell" Tag="PowerShell"/>
+                        <ComboBoxItem Content="Batch" Tag="Batch"/>
+                        <ComboBoxItem Content="Driver (pnputil)" Tag="DriverInf"/>
+                        <ComboBoxItem Content="Driver (all .inf in folder)" Tag="DriverFolder"/>
+                        <ComboBoxItem Content="Don't run anything (copy only)" Tag="CopyOnly"/>
+                    </ComboBox>
+
+                    <TextBlock Text="Arguments (silent flags)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="ArgumentsBox" Margin="0,0,0,6"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             TextChanged="ArgumentsBox_TextChanged"
+                             FontSize="12" Padding="8,4"/>
+                    <WrapPanel x:Name="FlagChips" Margin="0,0,0,4"/>
+                    <TextBlock x:Name="WillRunText" FontSize="10" Opacity="0.7"
+                               TextWrapping="Wrap" Margin="0,0,0,4" Text=""/>
+                    <TextBlock x:Name="DetectionNote" FontSize="10"
+                               TextWrapping="Wrap" Margin="0,0,0,8" Text="" Visibility="Collapsed"/>
+
+                    <TextBlock Text="Destination folder" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="DestinationBox" Margin="0,0,0,4" Text="C:\temp\it"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             FontSize="12" Padding="8,4"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,12">
+                        <StackPanel Width="170">
+                            <TextBlock Text="Timeout / machine (min)" Style="{StaticResource FieldLabel}"/>
+                            <TextBox x:Name="TimeoutBox" Text="10"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     FontSize="12" Padding="8,4"/>
+                        </StackPanel>
+                        <StackPanel Width="130" Margin="12,0,0,0">
+                            <TextBlock Text="Concurrency" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="ConcurrencyCombo"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      FontSize="12" Padding="8,4">
+                                <ComboBoxItem Content="1"/>
+                                <ComboBoxItem Content="2"/>
+                                <ComboBoxItem Content="3"/>
+                                <ComboBoxItem Content="5"/>
+                                <ComboBoxItem Content="8"/>
+                                <ComboBoxItem Content="10" IsSelected="True"/>
+                                <ComboBoxItem Content="15"/>
+                                <ComboBoxItem Content="20"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <WrapPanel Margin="0,4,0,0">
+                        <CheckBox x:Name="VerifyHashCheck" Content="Verify hash after copy"
+                                  Margin="0,0,16,6" FontSize="12"/>
+                        <CheckBox x:Name="DeleteAfterCheck" Content="Delete after run"
+                                  Margin="0,0,16,6" FontSize="12"/>
+                        <CheckBox x:Name="MasterFallbackCheck" Content="Allow scheduled-task fallback"
+                                  IsChecked="True" FontSize="12" Margin="0,0,0,6"
+                                  Checked="MasterFallback_Changed" Unchecked="MasterFallback_Changed"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Machines grid -->
+        <DataGrid x:Name="MachinesGrid" Grid.Row="2"
+                  AutoGenerateColumns="False" CanUserAddRows="False"
+                  HeadersVisibility="Column" IsReadOnly="False"
+                  GridLinesVisibility="Horizontal"
+                  materialDesign:DataGridAssist.CellPadding="8,4"
+                  Style="{StaticResource MaterialDesignDataGrid}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Computer" Binding="{Binding ComputerName}"
+                                    Width="*" IsReadOnly="True"/>
+                <DataGridCheckBoxColumn Header="Task fallback"
+                                        Binding="{Binding AllowTaskFallback, UpdateSourceTrigger=PropertyChanged}"
+                                        Width="Auto"/>
+                <DataGridTemplateColumn Header="Status" Width="260" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="10" Height="10" Margin="0,0,8,0"
+                                         Fill="{Binding StatusColor, Converter={StaticResource StringToColorBrushConverter}}"/>
+                                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" FontSize="12"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Footer status -->
+        <Grid Grid.Row="3" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="ProgressText" Grid.Column="0" VerticalAlignment="Center"
+                       FontWeight="SemiBold" FontSize="12" Text=""/>
+            <TextBlock x:Name="FailuresText" Grid.Column="1" VerticalAlignment="Center"
+                       Margin="16,0,0,0" FontSize="11" Foreground="#E53935"
+                       TextTrimming="CharacterEllipsis" Text=""/>
+        </Grid>
+
+        <!-- Actions -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="CancelButton" Content="Cancel" Click="CancelButton_Click"
+                    IsEnabled="False" Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="0,0,8,0" Padding="16,4"/>
+            <Button x:Name="CloseButton" Content="Close" Click="CloseButton_Click"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Margin="0,0,8,0" Padding="16,4"/>
+            <Button x:Name="RunButton" Content="Run" Click="RunButton_Click"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Padding="24,4"/>
+        </StackPanel>
+    </Grid>
+</Window>

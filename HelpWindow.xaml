@@ -1,0 +1,555 @@
+<Window x:Class="ActiveScanner.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Active Scanner - Help" 
+        Height="700" Width="850"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}">
+    
+    <Window.Resources>
+        <Style x:Key="HelpItem" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+        <Style x:Key="HelpIcon" TargetType="materialDesign:PackIcon">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidBrush}"/>
+        </Style>
+        <Style x:Key="HelpText" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style x:Key="SubItem" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Margin" Value="24,4,0,0"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="16">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Style="{StaticResource MaterialDesignHeadline4TextBlock}" 
+                           Text="Active Scanner Help" Margin="0,0,0,16"/>
+
+                <!-- Overview -->
+                <Expander IsExpanded="True" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Overview"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,12">
+                            Active Scanner browses Active Directory and queries computers, users, and printers with integrated network tools. Uses LDAP without requiring RSAT.
+                        </TextBlock>
+                        <TextBlock Text="Supported AD Objects:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="DesktopClassic" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Computers:</Run> Name, DNS, Description, OS, Enabled, AD Logon, Location</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="AccountMultiple" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Users:</Run> Display Name, SAM Account, Email, Title, Department, Manager</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Printer" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Printers:</Run> Server, Share Name, Port, Driver, UNC Path, Location</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Keyboard Shortcuts -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Keyboard Shortcuts"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Keyboard" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Ctrl+A</Run> — Select all items in grid</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Keyboard" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Enter</Run> — Apply filter immediately (in column filter textbox)</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Navigation -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Navigation"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Earth" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click a domain button in the Quick Bar to connect</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderOpen" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Double-click a subfolder to navigate into it</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ChevronRight" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click breadcrumb segments to navigate to any level</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ArrowLeft" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Use the Back button to go back</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Domain Groups -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Domain Groups"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">Search multiple AD locations at once with a single click.</TextBlock>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Plus" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click "Create Domain Group" in the sidebar</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderPlus" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Navigate to folders and add paths to your group</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FormatListBulleted" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Set the object type (Computers, Users, or Printers)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Pin" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Enable "Show in Quick Bar" to display as a button above results</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Palette" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Choose a button color to identify your groups</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="DotsGrid" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Drag groups in the sidebar to reorder</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Custom Groups -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Custom Groups"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">Save collections of specific computers, users, or printers for quick access.</TextBlock>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="CheckboxMultipleMarked" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Select objects in the results grid (Ctrl+Click for multi-select)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderPlusOutline" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Right-click → "Create Group" to save the selection</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderArrowRight" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Right-click → "Add to Group" to add to an existing group</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Pencil" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Right-click groups to edit, rename, or delete</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="DotsGrid" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Drag groups to reorder in the sidebar</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Pin" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Enable "Show in Quick Bar" for one-click access</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Filtering and Sorting -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Filtering and Sorting"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock Text="Column Filtering:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Filter" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Each column has a filter textbox below the header</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="KeyboardReturn" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Filters apply automatically as you type (with slight delay)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FormatLetterCase" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Filters are case-insensitive and match any part of the value</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Close" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click the X button to clear a column filter</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FilterRemove" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click "Clear Filters" to reset all filters at once</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Sorting:" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="SortAscending" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click column headers to cycle: None → Ascending → Descending</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Network Tools -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Network Tools"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">Right-click computers in the results grid to access network tools. Results appear in the Network Output panel at the bottom.</TextBlock>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="LanConnect" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Ping</Run> — Test network connectivity (batch supported)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="RouterNetwork" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Traceroute</Run> — Trace the network path to a target</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ChartTimelineVariant" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Pathping</Run> — Combined trace and ping statistics</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Dns" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">DNS Forward</Run> — Resolve hostnames to IP addresses</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Dns" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">DNS Reverse</Run> — Resolve IP addresses to hostnames</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Ethernet" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Port Test</Run> — Check if TCP ports are open (RDP, SMB, RPC, WinRM, SSH, HTTP/S presets)</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Admin Features (require login):" FontWeight="SemiBold" Margin="0,12,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="RemoteDesktop" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">RDP</Run> — Launch Remote Desktop connection</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="AccountClock" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Last User</Run> — Query last logged-on user via WMI</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ShieldRefresh" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">GPUpdate</Run> — Run Group Policy refresh remotely</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Restart" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Remote Reboot</Run> — Restart computer remotely</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Web" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">HTTP/HTTPS</Run> — Open target in web browser</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Admin Login -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Admin Login"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ShieldAccount" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click the lock icon in the title bar to log in</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Account" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Supports domain\username format</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ShieldLock" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Credentials are session-only and never saved to disk</TextBlock>
+                        </StackPanel>
+                        <TextBlock Text="Enables:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Check" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Last User queries</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Check" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Remote GPUpdate</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Check" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Remote Reboot</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Check" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Remote Desktop connections</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Export -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Export"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Export" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click the Export icon in the top right</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Formats:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="MicrosoftExcel" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Excel (.xlsx)</Run> — Formatted with auto-widths and color-coded rows</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FileDelimited" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">CSV (.csv)</Run> — Comma-separated values</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="CodeJson" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">JSON (.json)</Run> — Structured data format</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FileDocument" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Text (.txt)</Run> — Plain text report</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="LanguageHtml5" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">HTML (.html)</Run> — Formatted web page</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ContentCopy" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Clipboard</Run> — Tab-delimited data for pasting</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Special:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Database" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Last User Database</Run> — Export persistent computer cache with Last User data</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Caching -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Caching"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Cached" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Query results are cached for 12 hours by default</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Clock" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Cache age shown in status bar ("Last updated at...")</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Refresh" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click the Refresh button to bypass cache and get fresh results</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Cog" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Configure Cache TTL in Settings (0 to disable)</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Persistent Computer Cache:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Database" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Last User data is saved to disk and persists between sessions</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Export" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Export "Last User Database" to get all cached computer data</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Tabs -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Tabs"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock Text="Tab Types:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderMultiple" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Domain Results</Run> — Main results from domain navigation (cannot close)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderMultiple" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">Group: [Name]</Run> — Results from Domain Group searches</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="DesktopClassic" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}"><Run FontWeight="SemiBold">[Custom Group]</Run> — Contents of saved object collections</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Tab Features:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="DragHorizontal" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Drag tabs to reorder them</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Pencil" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click pencil icon to rename tabs</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Close" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click X to close closable tabs</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Filter" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Each tab has its own filters and sort settings</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Quick Bar -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Quick Bar"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">The Quick Bar appears above the results for one-click access.</TextBlock>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Earth" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Domain buttons for quick domain navigation</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="FolderMultiple" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Domain Groups with "Show in Quick Bar" enabled</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="DesktopClassic" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Custom Groups with "Show in Quick Bar" enabled</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Palette" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Button colors: Default, Blue, Green, Orange, Purple, Teal, Red</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Settings -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Settings"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Cog" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Click the gear icon in the title bar to open Settings</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Appearance:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="WeatherNight" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Dark/Light mode toggle</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Network:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Timer" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Default timeout for network operations</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Cache:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Clock" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Cache TTL in minutes (0 to disable)</TextBlock>
+                        </StackPanel>
+                        
+                        <TextBlock Text="Data:" FontWeight="SemiBold" Margin="0,8,0,4"/>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="Restore" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Restore default domain groups</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="FolderOpen" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Open settings folder</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource SubItem}">
+                            <materialDesign:PackIcon Kind="DeleteForever" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Reset all settings</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Tips -->
+                <Expander IsExpanded="False" Margin="0,0,0,8"
+                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                    <Expander.Header>
+                        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Tips"/>
+                    </Expander.Header>
+                    <StackPanel Margin="0,8,0,8">
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="MouseLeftClick" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Right-click any result for quick actions (Ping, RDP, Copy, etc.)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="CheckboxMultipleMarked" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Multi-select using Ctrl+Click or Shift+Click</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="WeatherNight" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Toggle Dark Mode using the moon/sun icon</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ProgressClock" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Long operations run in background — keep working while they complete</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="SkipNext" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Use Cancel or Skip buttons during batch operations</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="ContentCopy" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">Hover over cells to copy text</TextBlock>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource HelpItem}">
+                            <materialDesign:PackIcon Kind="Numeric" Style="{StaticResource HelpIcon}"/>
+                            <TextBlock Style="{StaticResource HelpText}">"Vista Copy" extracts trailing numbers from computer names</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Version -->
+                <Separator Margin="0,16"/>
+                <TextBlock Text="Active Scanner v1.1.1"
+                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

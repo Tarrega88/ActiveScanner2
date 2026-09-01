@@ -1,0 +1,231 @@
+<Application x:Class="ActiveScanner.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:ActiveScanner.Converters"
+             xmlns:vm="clr-namespace:ActiveScanner.ViewModels"
+             StartupUri="MainWindow.xaml"
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Blue" SecondaryColor="Teal" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- FilterMode enum values for ComboBox binding -->
+            <ObjectDataProvider x:Key="FilterModeValues" MethodName="GetValues" ObjectType="{x:Type system:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="vm:FilterMode"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            
+            <!-- Converters -->
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:BoolToHiddenVisibilityConverter x:Key="BoolToHiddenVisibilityConverter"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+            <converters:CountToBoolConverter x:Key="CountToBoolConverter"/>
+            <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
+            <converters:DataGridRowDetailsVisibilityConverter x:Key="DataGridRowDetailsVisibilityConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+            <converters:BusyAndNotNetworkConverter x:Key="BusyAndNotNetworkConverter"/>
+            <converters:AnyBoolToHiddenVisibilityConverter x:Key="AnyBoolToHiddenVisibilityConverter"/>
+            <converters:AllBoolToHiddenVisibilityConverter x:Key="AllBoolToHiddenVisibilityConverter"/>
+            <converters:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
+            <converters:BoolToIconConverter x:Key="BoolToIconConverter"/>
+            <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
+            <converters:TabTypeToIconConverter x:Key="TabTypeToIconConverter"/>
+            <converters:SuccessToColorConverter x:Key="SuccessToColorConverter"/>
+            <converters:StringToColorBrushConverter x:Key="StringToColorBrushConverter"/>
+            <converters:SortDirectionToIconConverter x:Key="SortDirectionToIconConverter"/>
+            <converters:SortColumnVisibilityConverter x:Key="SortColumnVisibilityConverter"/>
+            <converters:NullableIntConverter x:Key="NullableIntConverter"/>
+            <converters:ComputerHoverVisibilityConverter x:Key="ComputerHoverVisibilityConverter"/>
+            <converters:LastUserFetchButtonVisibilityConverter x:Key="LastUserFetchButtonVisibilityConverter"/>
+            <converters:DistinguishedNameToPathConverter x:Key="DistinguishedNameToPathConverter"/>
+            <converters:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+            <converters:ListHasItemsToVisibilityConverter x:Key="ListHasItemsToVisibilityConverter"/>
+            <converters:ListHasItemsToInverseVisibilityConverter x:Key="ListHasItemsToInverseVisibilityConverter"/>
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:IpAddressToColorConverter x:Key="IpAddressToColorConverter"/>
+            <converters:IpAddressStaleColorConverter x:Key="IpAddressStaleColorConverter"/>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:NullableBoolToIndexConverter x:Key="NullableBoolToIndexConverter"/>
+            <converters:ButtonColorToBrushConverter x:Key="ButtonColorToBrushConverter"/>
+            <converters:ButtonColorToSimpleBrushConverter x:Key="ButtonColorToSimpleBrushConverter"/>
+
+            <converters:EnumToCollectionConverter x:Key="EnumToCollectionConverter"/>
+            <converters:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter"/>
+            <converters:UtcToLocalDateTimeConverter x:Key="UtcToLocalDateTimeConverter"/>
+            
+            <!-- Boolean values for ComboBox bindings -->
+            <system:Boolean x:Key="True">True</system:Boolean>
+            <system:Boolean x:Key="False">False</system:Boolean>
+            
+            <!-- Custom Styles -->
+            <Style x:Key="SectionHeader" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}"/>
+                <Setter Property="Margin" Value="0,8,0,4"/>
+            </Style>
+            
+            <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                <Setter Property="Margin" Value="4,2"/>
+                <Setter Property="Padding" Value="10,4"/>
+                <Setter Property="Height" Value="32"/>
+            </Style>
+            
+            <Style x:Key="CompactButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                <Setter Property="Margin" Value="1"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="MinWidth" Value="0"/>
+            </Style>
+            
+            <!-- DataGrid style with column borders -->
+            <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                <Setter Property="GridLinesVisibility" Value="Vertical"/>
+                <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            
+            <!-- DataGridCell style with border -->
+            <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+                <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                <Style.Triggers>
+                    <!-- When in a selected+hovered row, make cell background transparent so row background shows -->
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True"/>
+                            <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True"/>
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="Transparent"/>
+                    </MultiDataTrigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- DataGridColumnHeader style with border -->
+            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            </Style>
+            
+            <!-- DataGridRow style with proper hover on selected rows -->
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                <Style.Triggers>
+                    <!-- When selected AND hovered, use a brighter highlight -->
+                    <MultiTrigger>
+                        <MultiTrigger.Conditions>
+                            <Condition Property="IsSelected" Value="True"/>
+                            <Condition Property="IsMouseOver" Value="True"/>
+                        </MultiTrigger.Conditions>
+                        <!-- Use a light blue that's brighter than the selection color -->
+                        <Setter Property="Background" Value="#5090CAF9"/>
+                    </MultiTrigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- Vibrant button style for location shortcuts -->
+            <Style x:Key="VibrantLocationButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                <Setter Property="BorderBrush" Value="#1B7F37"/>
+                <Setter Property="Foreground" Value="#1B7F37"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#151B7F37"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- Tab icon button style with hover effects for dark/light mode -->
+            <Style x:Key="TabIconButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignToolButton}">
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="20"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="4,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBodyLight}"/>
+                <Setter Property="Opacity" Value="0.6"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="1"/>
+                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                        <Setter Property="Background" Value="{DynamicResource MaterialDesignDivider}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- Tab close button style (inherits TabIconButton but uses different hover color) -->
+            <Style x:Key="TabCloseButton" TargetType="Button" BasedOn="{StaticResource TabIconButton}">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="1"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="Background" Value="#D32F2F"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- Cell copy button style - base style, visibility controlled by inline bindings -->
+            <Style x:Key="CellCopyButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignToolButton}">
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="20"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="2,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Visibility" Value="Hidden"/>
+                <Setter Property="ToolTip" Value="Copy to clipboard"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                <Setter Property="Opacity" Value="0.7"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Opacity" Value="1"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- Sidebar Expander style with right-aligned toggle arrow -->
+            <Style x:Key="SidebarExpander" TargetType="Expander" BasedOn="{StaticResource MaterialDesignExpander}">
+                <Setter Property="materialDesign:ExpanderAssist.HorizontalHeaderPadding" Value="0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Padding" Value="0"/>
+            </Style>
+            
+            <!-- Compact filter mode ComboBox style for column header filters -->
+            <Style x:Key="FilterModeComboBox" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+                <Setter Property="Width" Value="68"/>
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="materialDesign:ComboBoxAssist.ShowSelectedItem" Value="True"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="ToolTip" Value="Filter mode: Contains, Starts with, Ends with, or Equals"/>
+                <Style.Triggers>
+                    <!-- Highlight when not Contains (default) -->
+                    <Trigger Property="SelectedIndex" Value="1">
+                        <Setter Property="BorderBrush" Value="#1976D2"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                    </Trigger>
+                    <Trigger Property="SelectedIndex" Value="2">
+                        <Setter Property="BorderBrush" Value="#1976D2"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                    </Trigger>
+                    <Trigger Property="SelectedIndex" Value="3">
+                        <Setter Property="BorderBrush" Value="#1976D2"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

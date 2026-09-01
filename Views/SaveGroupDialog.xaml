@@ -1,0 +1,45 @@
+<Window x:Class="ActiveScanner.Views.SaveGroupDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Name Group"
+        Height="210" Width="420"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" x:Name="PromptText"
+                   Text="Enter a name for this group:"
+                   Margin="0,0,0,8"/>
+
+        <TextBox Grid.Row="1" x:Name="GroupNameTextBox"
+                 materialDesign:HintAssist.Hint="Group Name"
+                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                 TextChanged="GroupNameTextBox_TextChanged"
+                 KeyDown="GroupNameTextBox_KeyDown"/>
+
+        <TextBlock Grid.Row="2" x:Name="ErrorText"
+                   Foreground="#E53935"
+                   Margin="0,6,0,0"
+                   Visibility="Collapsed"
+                   TextWrapping="Wrap"/>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancel" Style="{StaticResource MaterialDesignFlatButton}"
+                    Click="Cancel_Click" Margin="0,0,8,0" IsCancel="True"/>
+            <Button x:Name="SaveButton" Content="Save"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Click="Save_Click" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,348 @@
+<Window x:Class="ActiveScanner.Views.EmailTemplateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Email Template"
+        Height="720" Width="900"
+        MinHeight="560" MinWidth="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        Style="{StaticResource MaterialDesignWindow}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,8,4"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style x:Key="FieldTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="EmailEditOutline" Width="28" Height="28"
+                                         VerticalAlignment="Center" Margin="0,0,12,0"
+                                         Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                <TextBlock Text="Email Template" Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <Grid Margin="0,0,8,0">
+                    <ComboBox x:Name="TemplateComboBox"
+                              Width="220" Height="32"
+                              IsEditable="True" IsTextSearchEnabled="False"
+                              TextSearch.TextPath="Name"
+                              materialDesign:HintAssist.Hint="Search templates..."
+                              materialDesign:HintAssist.IsFloating="False"
+                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                              SelectionChanged="TemplateComboBox_SelectionChanged"
+                              PreviewTextInput="TemplateComboBox_PreviewTextInput"
+                              PreviewKeyDown="TemplateComboBox_PreviewKeyDown">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Style="{StaticResource MaterialDesignToolButton}"
+                            x:Name="ClearTemplateSearchButton"
+                            Width="20" Height="20"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,26,0"
+                            ToolTip="Clear search" Click="ClearTemplateSearch_Click"
+                            Visibility="Collapsed">
+                        <materialDesign:PackIcon Kind="Close" Width="12" Height="12"/>
+                    </Button>
+                    <ToggleButton Style="{StaticResource MaterialDesignToolButton}"
+                                  Width="20" Height="20"
+                                  HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Margin="0,0,4,0"
+                                  IsChecked="{Binding IsDropDownOpen, ElementName=TemplateComboBox, Mode=TwoWay}"
+                                  Focusable="False">
+                        <materialDesign:PackIcon Kind="ArrowDropDown" Width="16" Height="16"/>
+                    </ToggleButton>
+                </Grid>
+                <Button x:Name="SaveTemplateButton" Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Content="Save Template" Click="SaveTemplate_Click" Margin="0,0,8,0"
+                        Height="32" Padding="12,0"/>
+                <Button x:Name="DeleteTemplateButton" Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Content="Delete" Click="DeleteTemplate_Click"
+                        Height="32" Padding="12,0"
+                        Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                        BorderBrush="{DynamicResource MaterialDesignValidationErrorBrush}"
+                        IsEnabled="False"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Body -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left column: form -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="RECIPIENTS" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="To" Style="{StaticResource FieldLabelStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="ToTextBox" Style="{StaticResource FieldTextBoxStyle}"
+                                         materialDesign:HintAssist.Hint="email1@x.com; {{Mail}}"/>
+                                <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                        Width="32" Height="32" ToolTip="Insert column variable"
+                                        Tag="ToTextBox" Click="InsertVariable_Click">
+                                    <materialDesign:PackIcon Kind="CodeBraces" Width="16" Height="16"/>
+                                </Button>
+                            </Grid>
+
+                            <TextBlock Text="Cc" Style="{StaticResource FieldLabelStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="CcTextBox" Style="{StaticResource FieldTextBoxStyle}"/>
+                                <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                        Width="32" Height="32" ToolTip="Insert column variable"
+                                        Tag="CcTextBox" Click="InsertVariable_Click">
+                                    <materialDesign:PackIcon Kind="CodeBraces" Width="16" Height="16"/>
+                                </Button>
+                            </Grid>
+
+                            <TextBlock Text="Bcc" Style="{StaticResource FieldLabelStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="BccTextBox" Style="{StaticResource FieldTextBoxStyle}"/>
+                                <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                        Width="32" Height="32" ToolTip="Insert column variable"
+                                        Tag="BccTextBox" Click="InsertVariable_Click">
+                                    <materialDesign:PackIcon Kind="CodeBraces" Width="16" Height="16"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="MESSAGE" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Subject" Style="{StaticResource FieldLabelStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="SubjectTextBox" Style="{StaticResource FieldTextBoxStyle}"/>
+                                <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                        Width="32" Height="32" ToolTip="Insert column variable"
+                                        Tag="SubjectTextBox" Click="InsertVariable_Click">
+                                    <materialDesign:PackIcon Kind="CodeBraces" Width="16" Height="16"/>
+                                </Button>
+                            </Grid>
+
+                            <Grid Margin="0,4,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Body" Style="{StaticResource FieldLabelStyle}"/>
+                                <CheckBox Grid.Column="1" x:Name="HtmlBodyCheckBox" Content="HTML"
+                                          Click="HtmlBodyCheckBox_Click"
+                                          ToolTip="Treat the body as HTML (raw HTML markup will be rendered in Outlook)"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="BodyTextBox" Style="{StaticResource FieldTextBoxStyle}"
+                                         TextWrapping="Wrap" AcceptsReturn="True"
+                                         MinHeight="220" MaxHeight="320"
+                                         VerticalScrollBarVisibility="Auto"
+                                         FontFamily="Consolas" FontSize="12"/>
+                                <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                        Width="32" Height="32" ToolTip="Insert column variable"
+                                        Tag="BodyTextBox" Click="InsertVariable_Click"
+                                        VerticalAlignment="Top">
+                                    <materialDesign:PackIcon Kind="CodeBraces" Width="16" Height="16"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="OPTIONS" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="When multiple items are selected:" Style="{StaticResource FieldLabelStyle}"/>
+                            <StackPanel Orientation="Vertical" Margin="0,4,0,0">
+                                <RadioButton x:Name="PerItemRadio" GroupName="RecipientMode"
+                                             Content="One email per item (placeholders evaluated per item)"
+                                             IsChecked="True" Margin="0,2"
+                                             Click="RecipientMode_Changed"/>
+                                <RadioButton x:Name="CombinedRadio" GroupName="RecipientMode"
+                                             Content="One combined email (To/Cc/Bcc placeholders aggregated; Subject/Body use first item)"
+                                             Margin="0,2"
+                                             Click="RecipientMode_Changed"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Right column: items + variables + preview -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="SELECTED ITEMS" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <Expander IsExpanded="True">
+                            <Expander.Header>
+                                <TextBlock x:Name="AffectedItemsHeader" Text="0 items selected" FontWeight="Medium"/>
+                            </Expander.Header>
+                            <ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                                <ItemsControl x:Name="AffectedItemsList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                    BorderThickness="0,0,0,1" Padding="4,4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                                            Width="24" Height="24" Padding="0"
+                                                            ToolTip="Remove" Tag="{Binding}"
+                                                            Click="RemoveAffectedItem_Click">
+                                                        <materialDesign:PackIcon Kind="Close" Width="14" Height="14"
+                                                                                 Foreground="#F44336"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Expander>
+                    </Border>
+
+                    <TextBlock Text="AVAILABLE VARIABLES" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <Expander IsExpanded="False">
+                            <Expander.Header>
+                                <TextBlock Text="Click to view column variables" FontWeight="Medium" FontSize="11"/>
+                            </Expander.Header>
+                            <WrapPanel Margin="0,8,0,0">
+                                <ItemsControl x:Name="VariablesList">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource MaterialDesignDivider}"
+                                                    CornerRadius="4" Padding="6,2" Margin="0,0,4,4">
+                                                <TextBlock Text="{Binding}" FontSize="11" FontFamily="Consolas"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </WrapPanel>
+                        </Expander>
+                    </Border>
+
+                    <TextBlock Text="PREVIEW (FIRST ITEM)" FontWeight="SemiBold" FontSize="12"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8"/>
+                    <Border Background="{DynamicResource MaterialDesignCardBackground}"
+                            CornerRadius="4" Padding="12" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="To" FontWeight="SemiBold" FontSize="11"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock x:Name="PreviewToText" TextWrapping="Wrap" Margin="0,0,0,6"
+                                       FontFamily="Consolas" FontSize="11"/>
+                            <TextBlock Text="Cc" FontWeight="SemiBold" FontSize="11"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock x:Name="PreviewCcText" TextWrapping="Wrap" Margin="0,0,0,6"
+                                       FontFamily="Consolas" FontSize="11"/>
+                            <TextBlock Text="Subject" FontWeight="SemiBold" FontSize="11"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock x:Name="PreviewSubjectText" TextWrapping="Wrap" Margin="0,0,0,6"
+                                       FontFamily="Consolas" FontSize="11"/>
+                            <TextBlock Text="Body" FontWeight="SemiBold" FontSize="11"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                            <TextBlock x:Name="PreviewBodyText" TextWrapping="Wrap"
+                                       MaxHeight="120" FontFamily="Consolas" FontSize="11"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Action buttons -->
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Style="{StaticResource MaterialDesignFlatButton}"
+                        Content="Cancel" Click="Cancel_Click" Margin="0,0,8,0"/>
+                <Button x:Name="OpenInOutlookButton" Style="{StaticResource MaterialDesignRaisedButton}"
+                        Click="OpenInOutlook_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="MicrosoftOutlook" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="OpenInOutlookButtonText" Text="Open in Outlook" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

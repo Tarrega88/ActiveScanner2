@@ -1,0 +1,2 @@
+<!-- This is a placeholder for the application icon -->
+<!-- Replace with actual .ico file -->
