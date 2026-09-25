@@ -12,7 +12,7 @@
 #define MyAppExeName "ActiveScanner.exe"
 ; Version can be overridden from the command line: ISCC /DMyAppVersion=1.2.3
 #ifndef MyAppVersion
-  #define MyAppVersion "1.1.2"
+  #define MyAppVersion "1.1.3"
 #endif
 
 [Setup]

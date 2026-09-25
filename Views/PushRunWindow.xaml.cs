@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -139,16 +140,19 @@ namespace ActiveScanner.Views
             }
 
             var entryCount = await Task.Run(() => CountZipEntries(path));
-            if (entryCount == 0)
+            var isPaperStream = entryCount == 0 && await Task.Run(() => IsPaperStreamWrapper(path));
+            if (entryCount == 0 && !isPaperStream)
             {
                 SetPayload(path);
                 return;
             }
 
+            var what = isPaperStream
+                ? "a Fujitsu PaperStream IP package. Its wrapper and Setup.exe crash when run remotely"
+                : $"a self-extracting package ({entryCount} files). These usually open a setup wizard that can't be silenced, so they hang when run remotely";
             var answer = MessageBox.Show(this,
-                $"\"{Path.GetFileName(path)}\" is a self-extracting package ({entryCount} files).\n\n" +
-                "These usually open a setup wizard that can't be silenced, so they hang when run remotely.\n\n" +
-                "Unpack it and push the contents instead? (Recommended)",
+                $"\"{Path.GetFileName(path)}\" is {what}.\n\n" +
+                "Unpack it on this PC and push the contents instead? (Recommended)",
                 "Push & Run", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (answer != MessageBoxResult.Yes)
             {
@@ -163,13 +167,15 @@ namespace ActiveScanner.Views
             PayloadHash.Text = string.Empty;
             try
             {
-                var hint = await Task.Run(() =>
+                var (root, hint) = await Task.Run(() =>
                 {
                     if (Directory.Exists(target)) Directory.Delete(target, recursive: true);
+                    Directory.CreateDirectory(target);
+                    if (isPaperStream) return UnpackPaperStream(path, target);
                     ZipFile.ExtractToDirectory(path, target);
-                    return PreparePackage(target);
+                    return (target, PreparePackage(target));
                 });
-                SetPayload(target, hint);
+                SetPayload(root, hint);
             }
             catch (Exception ex)
             {
@@ -191,6 +197,88 @@ namespace ActiveScanner.Views
                 return zip.Entries.Count;
             }
             catch { return 0; }
+        }
+
+        private static bool IsPaperStreamWrapper(string path)
+        {
+            try
+            {
+                var text = ReadSignatureText(path);
+                return text.Contains("PaperStream IP **** Make Updater", StringComparison.OrdinalIgnoreCase)
+                    || text.Contains("PsipUpdater.exe", StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
+        }
+
+        // Runs the PFU wrapper with /X (extract only) in an empty folder so it never hits its
+        // overwrite prompts; /H stops it hiding the foreground window (which would be ours).
+        private static (string Root, PackageHint? Hint) UnpackPaperStream(string exe, string work)
+        {
+            var copy = Path.Combine(work, Path.GetFileName(exe));
+            File.Copy(exe, copy);
+            var psi = new ProcessStartInfo(copy, "/X /H")
+            {
+                WorkingDirectory = work,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using (var p = Process.Start(psi) ?? throw new InvalidOperationException("Unpacker didn't start"))
+            {
+                if (!p.WaitForExit(TimeSpan.FromMinutes(10)))
+                {
+                    try { p.Kill(entireProcessTree: true); } catch { /* already gone */ }
+                    throw new TimeoutException("Unpacking timed out");
+                }
+                if (p.ExitCode != 0)
+                    throw new InvalidOperationException($"Unpacker exited with code {p.ExitCode}");
+            }
+            File.Delete(copy);
+
+            var setupIni = Directory.EnumerateFiles(work, "fi-setup.ini", SearchOption.AllDirectories).FirstOrDefault()
+                ?? throw new FileNotFoundException("fi-setup.ini not found after unpacking");
+            var root = Path.GetDirectoryName(setupIni)!;
+            return (root, FindPaperStreamMsi(root, setupIni));
+        }
+
+        // Setup.exe just runs msiexec with the command in the first component INI listed in
+        // fi-setup.ini; reproduce that command (minus its placeholders) for the driver MSI.
+        private static PackageHint? FindPaperStreamMsi(string root, string setupIni)
+        {
+            const string framework = "PaperStream IP (Fujitsu/PFU)";
+            try
+            {
+                var inst = File.ReadLines(setupIni, Encoding.Latin1)
+                    .Select(l => Regex.Match(l, @"^\s*inst\d+\s*=\s*(.+?)\s*$", RegexOptions.IgnoreCase))
+                    .FirstOrDefault(m => m.Success)?.Groups[1].Value
+                    .Replace("%OWNDIR%", root, StringComparison.OrdinalIgnoreCase);
+                if (inst != null && File.Exists(inst))
+                {
+                    var para = File.ReadLines(inst, Encoding.Latin1)
+                        .Select(l => Regex.Match(l, @"^\s*SetupPara01\s*=.*\\([^""\\]+\.msi)""\s*(.*?)""?\s*$", RegexOptions.IgnoreCase))
+                        .FirstOrDefault(m => m.Success);
+                    if (para != null)
+                    {
+                        var msi = Directory.EnumerateFiles(root, para.Groups[1].Value, SearchOption.AllDirectories).FirstOrDefault();
+                        if (msi != null)
+                        {
+                            var extra = para.Groups[2].Value
+                                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                .Where(t => !(t.StartsWith('%') && t.EndsWith('%'))
+                                    && !t.Equals("/qn", StringComparison.OrdinalIgnoreCase)
+                                    && !t.Equals("/norestart", StringComparison.OrdinalIgnoreCase));
+                            var flags = string.Join(" ", new[] { "/qn", "/norestart" }.Concat(extra));
+                            return new PackageHint(Path.GetRelativePath(root, msi), framework, flags);
+                        }
+                    }
+                }
+            }
+            catch { /* fall through to the largest MSI */ }
+
+            var largest = Directory.EnumerateFiles(root, "*.msi", SearchOption.AllDirectories)
+                .OrderByDescending(f => new FileInfo(f).Length)
+                .FirstOrDefault();
+            return largest == null ? null
+                : new PackageHint(Path.GetRelativePath(root, largest), framework, "/qn /norestart");
         }
 
         // Picks the inner installer and applies any vendor-specific silent configuration.
@@ -331,7 +419,7 @@ namespace ActiveScanner.Views
         private void ApplyDefaultFlags()
         {
             if (ArgumentsBox == null) return;
-            var def = GetEffectiveKindString() switch
+            var def = ActiveHint()?.Flag ?? GetEffectiveKindString() switch
             {
                 "msi" => "/quiet /norestart",
                 "inf" or "inf-folder" => "/subdirs",
@@ -357,8 +445,7 @@ namespace ActiveScanner.Views
             _detectedFramework = null;
             if (GetEffectiveKindString() != "exe") return;
 
-            if (_packageHint is { Framework: not null } hint
-                && string.Equals(EntryPointCombo.SelectedItem as string, hint.Entry, StringComparison.OrdinalIgnoreCase))
+            if (ActiveHint() is { Framework: not null } hint)
             {
                 _detectedFramework = hint.Framework;
                 _detectedExeFlag = hint.Flag;
@@ -372,6 +459,13 @@ namespace ActiveScanner.Views
             _detectedFramework = framework;
             _detectedExeFlag = flag;
         }
+
+        // The unpack hint only applies while its entry point is the one selected.
+        private PackageHint? ActiveHint() =>
+            _packageHint != null
+            && string.Equals(EntryPointCombo?.SelectedItem as string, _packageHint.Entry, StringComparison.OrdinalIgnoreCase)
+                ? _packageHint
+                : null;
 
         private string? GetSelectedEntryLocalPath()
         {
@@ -388,11 +482,6 @@ namespace ActiveScanner.Views
             try
             {
                 var text = ReadSignatureText(path);
-                // PFU PaperStream wrapper: /D skips its "delete existing folder?" console prompt,
-                // /A forwards the silent flags to the inner InstallShield Disk1\Setup.exe.
-                if (text.Contains("PaperStream IP **** Make Updater", StringComparison.OrdinalIgnoreCase)
-                    || text.Contains("PsipUpdater.exe", StringComparison.OrdinalIgnoreCase))
-                    return ("PaperStream IP (Fujitsu/PFU)", "/D /A \"/s /v/qn\"");
                 if (text.Contains("Inno Setup", StringComparison.OrdinalIgnoreCase)
                     || text.Contains("JR.Inno.Setup", StringComparison.OrdinalIgnoreCase))
                     return ("Inno Setup", "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART");
@@ -456,15 +545,16 @@ namespace ActiveScanner.Views
         // or warns when the type is unknown so the operator knows to set a flag.
         private void UpdateDetectionNote()
         {
-            if (IsCopyOnly() || GetEffectiveKindString() != "exe")
+            var framework = _detectedFramework ?? ActiveHint()?.Framework;
+            if (IsCopyOnly() || (GetEffectiveKindString() != "exe" && framework == null))
             {
                 DetectionNote.Visibility = Visibility.Collapsed;
                 return;
             }
             DetectionNote.Visibility = Visibility.Visible;
-            if (_detectedFramework != null)
+            if (framework != null)
             {
-                DetectionNote.Text = $"Detected {_detectedFramework} installer — silent flag applied automatically.";
+                DetectionNote.Text = $"Detected {framework} installer — silent flag applied automatically.";
                 DetectionNote.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
             }
             else
