@@ -546,7 +546,7 @@
 
                 <!-- Version -->
                 <Separator Margin="0,16"/>
-                <TextBlock Text="Active Scanner v1.1.1"
+                <TextBlock Text="Active Scanner v1.1.2"
                            Foreground="{DynamicResource MaterialDesignBodyLight}"
                            HorizontalAlignment="Center"/>
             </StackPanel>

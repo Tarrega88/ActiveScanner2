@@ -24,7 +24,7 @@ $outputDir   = Join-Path $projectRoot 'installer\output'
 $csprojPath = Join-Path $projectRoot 'ActiveScanner.csproj'
 [xml]$csproj = Get-Content $csprojPath
 $version = ($csproj.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1)
-if (-not $version) { $version = '1.1.1' }
+if (-not $version) { $version = '1.1.2' }
 Write-Host "App version: $version" -ForegroundColor Cyan
 
 # --- Locate the Inno Setup compiler (ISCC.exe) ---
