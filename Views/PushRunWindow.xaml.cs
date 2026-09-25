@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -33,6 +35,15 @@ namespace ActiveScanner.Views
         private string _lastAppliedDefault = string.Empty;
         private string? _detectedExeFlag;
         private string? _detectedFramework;
+        private PackageHint? _packageHint;
+
+        // Entry point (and optional known silent flag) chosen after unpacking a self-extractor.
+        private sealed record PackageHint(string Entry, string? Framework, string? Flag);
+
+        // Kodak Alaris setup.ini ships its [SILENT] keys commented out; these are the ones to enable.
+        private static readonly Regex KodakSilentLines = new(
+            @"^;(?=\[SILENT\]|(?:SKIPTWAINIFNODOTNET|UPDATE|WELCOME|PLEASEWAIT|FINISH|REPORTERROR|TEMPDIR)=)",
+            RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
         private CancellationTokenSource? _cts;
         private bool _isRunning;
@@ -95,7 +106,7 @@ namespace ActiveScanner.Views
             if (_isRunning) return;
             if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
             if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths || paths.Length == 0) return;
-            SetPayload(paths[0]);
+            _ = SelectPayloadAsync(paths[0]);
         }
 
         private void BrowseFile_Click(object sender, RoutedEventArgs e)
@@ -106,7 +117,7 @@ namespace ActiveScanner.Views
                 Filter = "Installers, scripts & drivers (*.exe;*.msi;*.ps1;*.bat;*.cmd;*.inf)|*.exe;*.msi;*.ps1;*.bat;*.cmd;*.inf|All files (*.*)|*.*"
             };
             if (dlg.ShowDialog() == true)
-                SetPayload(dlg.FileName);
+                _ = SelectPayloadAsync(dlg.FileName);
         }
 
         private void BrowseFolder_Click(object sender, RoutedEventArgs e)
@@ -116,7 +127,104 @@ namespace ActiveScanner.Views
                 SetPayload(dlg.FolderName);
         }
 
-        private void SetPayload(string path)
+        // Self-extracting ZIP installers (e.g. WinZip SFX) launch a wizard that ignores silent flags,
+        // so offer to unpack locally and push the contents with the real installer as entry point.
+        private async Task SelectPayloadAsync(string path)
+        {
+            if (!File.Exists(path)
+                || !string.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                SetPayload(path);
+                return;
+            }
+
+            var entryCount = await Task.Run(() => CountZipEntries(path));
+            if (entryCount == 0)
+            {
+                SetPayload(path);
+                return;
+            }
+
+            var answer = MessageBox.Show(this,
+                $"\"{Path.GetFileName(path)}\" is a self-extracting package ({entryCount} files).\n\n" +
+                "These usually open a setup wizard that can't be silenced, so they hang when run remotely.\n\n" +
+                "Unpack it and push the contents instead? (Recommended)",
+                "Push & Run", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer != MessageBoxResult.Yes)
+            {
+                SetPayload(path);
+                return;
+            }
+
+            var target = Path.Combine(Path.GetTempPath(), "ActiveScanner_PushRun",
+                Path.GetFileNameWithoutExtension(path));
+            DropZone.IsEnabled = false;
+            PayloadSummary.Text = $"Unpacking {Path.GetFileName(path)}…";
+            PayloadHash.Text = string.Empty;
+            try
+            {
+                var hint = await Task.Run(() =>
+                {
+                    if (Directory.Exists(target)) Directory.Delete(target, recursive: true);
+                    ZipFile.ExtractToDirectory(path, target);
+                    return PreparePackage(target);
+                });
+                SetPayload(target, hint);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Couldn't unpack the package: {ex.Message}\n\nUsing the original file instead.",
+                    "Push & Run", MessageBoxButton.OK, MessageBoxImage.Warning);
+                SetPayload(path);
+            }
+            finally
+            {
+                DropZone.IsEnabled = !_isRunning;
+            }
+        }
+
+        private static int CountZipEntries(string path)
+        {
+            try
+            {
+                using var zip = ZipFile.OpenRead(path);
+                return zip.Entries.Count;
+            }
+            catch { return 0; }
+        }
+
+        // Picks the inner installer and applies any vendor-specific silent configuration.
+        private static PackageHint? PreparePackage(string root)
+        {
+            foreach (var ini in Directory.EnumerateFiles(root, "setup.ini", SearchOption.AllDirectories))
+            {
+                var text = File.ReadAllText(ini, Encoding.Latin1);
+                if (!text.Contains("Kodak Alaris", StringComparison.OrdinalIgnoreCase)
+                    || !text.Contains(";[SILENT]", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var exe = Path.Combine(Path.GetDirectoryName(ini)!, "setup.exe");
+                if (!File.Exists(exe)) continue;
+
+                File.WriteAllText(ini, KodakSilentLines.Replace(text, string.Empty), Encoding.Latin1);
+                return new PackageHint(Path.GetRelativePath(root, exe), "Kodak Alaris", "/S");
+            }
+
+            var candidate = Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
+                .Select(f => Path.GetRelativePath(root, f))
+                .Where(rel =>
+                {
+                    var name = Path.GetFileName(rel);
+                    return name.EndsWith(".msi", StringComparison.OrdinalIgnoreCase)
+                        || name.Equals("setup.exe", StringComparison.OrdinalIgnoreCase)
+                        || name.Equals("install.exe", StringComparison.OrdinalIgnoreCase);
+                })
+                .OrderBy(rel => rel.Count(c => c == Path.DirectorySeparatorChar))
+                .ThenBy(rel => rel.EndsWith(".msi", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                .FirstOrDefault();
+            return candidate == null ? null : new PackageHint(candidate, null, null);
+        }
+
+        private void SetPayload(string path, PackageHint? hint = null)
         {
             _isFolder = Directory.Exists(path);
             if (!_isFolder && !File.Exists(path))
@@ -127,6 +235,7 @@ namespace ActiveScanner.Views
             }
 
             _sourcePath = path;
+            _packageHint = hint;
             EntryPointCombo.Items.Clear();
 
             if (_isFolder)
@@ -144,9 +253,14 @@ namespace ActiveScanner.Views
                     EntryPointCombo.Items.Add(rel);
                 }
 
-                PayloadSummary.Text = $"Folder: {Path.GetFileName(root)}  ({files.Count} file(s))";
+                PayloadSummary.Text = hint != null
+                    ? $"Unpacked: {Path.GetFileName(root)}  ({files.Count} file(s))"
+                    : $"Folder: {Path.GetFileName(root)}  ({files.Count} file(s))";
                 PayloadHash.Text = string.Empty;
-                if (EntryPointCombo.Items.Count > 0) EntryPointCombo.SelectedIndex = 0;
+                if (hint != null && EntryPointCombo.Items.Contains(hint.Entry))
+                    EntryPointCombo.SelectedItem = hint.Entry;
+                else if (EntryPointCombo.Items.Count > 0)
+                    EntryPointCombo.SelectedIndex = 0;
             }
             else
             {
@@ -243,6 +357,14 @@ namespace ActiveScanner.Views
             _detectedFramework = null;
             if (GetEffectiveKindString() != "exe") return;
 
+            if (_packageHint is { Framework: not null } hint
+                && string.Equals(EntryPointCombo.SelectedItem as string, hint.Entry, StringComparison.OrdinalIgnoreCase))
+            {
+                _detectedFramework = hint.Framework;
+                _detectedExeFlag = hint.Flag;
+                return;
+            }
+
             var path = GetSelectedEntryLocalPath();
             if (path == null || !File.Exists(path)) return;
 
@@ -266,6 +388,11 @@ namespace ActiveScanner.Views
             try
             {
                 var text = ReadSignatureText(path);
+                // PFU PaperStream wrapper: /D skips its "delete existing folder?" console prompt,
+                // /A forwards the silent flags to the inner InstallShield Disk1\Setup.exe.
+                if (text.Contains("PaperStream IP **** Make Updater", StringComparison.OrdinalIgnoreCase)
+                    || text.Contains("PsipUpdater.exe", StringComparison.OrdinalIgnoreCase))
+                    return ("PaperStream IP (Fujitsu/PFU)", "/D /A \"/s /v/qn\"");
                 if (text.Contains("Inno Setup", StringComparison.OrdinalIgnoreCase)
                     || text.Contains("JR.Inno.Setup", StringComparison.OrdinalIgnoreCase))
                     return ("Inno Setup", "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART");
