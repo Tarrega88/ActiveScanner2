@@ -297,6 +297,21 @@ namespace ActiveScanner.Views
                 return new PackageHint(Path.GetRelativePath(root, exe), "Kodak Alaris", "/S");
             }
 
+            // Newer Kodak packages (v8+) drop the setup.ini template; setup.txt still names the publisher.
+            foreach (var txt in Directory.EnumerateFiles(root, "setup.txt", SearchOption.AllDirectories))
+            {
+                var dir = Path.GetDirectoryName(txt)!;
+                var exe = Path.Combine(dir, "setup.exe");
+                var ini = Path.Combine(dir, "setup.ini");
+                if (!File.Exists(exe) || File.Exists(ini)) continue;
+                if (!File.ReadAllText(txt, Encoding.Latin1).Contains("Kodak Alaris", StringComparison.OrdinalIgnoreCase)) continue;
+
+                File.WriteAllText(ini,
+                    "[SILENT]\r\nSKIPTWAINIFNODOTNET=1\r\nUPDATE=1\r\nWELCOME=1\r\nPLEASEWAIT=1\r\nFINISH=1\r\nREPORTERROR=1\r\nTEMPDIR=*\r\n",
+                    Encoding.Latin1);
+                return new PackageHint(Path.GetRelativePath(root, exe), "Kodak Alaris", "/S");
+            }
+
             var candidate = Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
                 .Select(f => Path.GetRelativePath(root, f))
                 .Where(rel =>
